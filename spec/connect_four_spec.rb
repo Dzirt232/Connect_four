@@ -1,22 +1,28 @@
+require 'active_support/core_ext/kernel/reporting'
 require "./lib/connect_four"
 
 describe Game do
   let(:player_1){Game::Player.new("Andrey")}
   let(:player_2){Game::Player.new("Maxim")}
-  before(:each){pole = Game::Pole.new}
+  before(:each){$pole = Game::Pole.new}
 
+  before(:each) do
+    $first_player = false
+    player_1
+    player_2
+  end
    context "starting" do
      it "create a pole" do
-        expect(pole.array).to eql([["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"],
+        expect($pole.array).to eql([["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"],
         ["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"]])
-        expect(pole.full).to be false
+        expect($pole.full).to be false
      end
 
      it "show a pole" do
-       output = capture(:stdout) do
-         pole.show
-       end
-       expect(output).to be_instance_of String
+      output = capture(:stdout) do
+        $pole.show
+      end
+      expect(output).to be_instance_of String
      end
 
      it "creating a players with right names" do
@@ -34,40 +40,53 @@ describe Game do
      context "it player can turn" do
        it "add symbol ☢" do
          player_1.xod(2,player_1.symbol)
-         expect(pole[2][0]).to eql("☢")
+         expect($pole.array[0][2]).to eql("☢")
        end
 
        it "add symbol ⚙" do
          player_2.xod(3,player_2.symbol)
-         expect(pole.array[3][0]).to eql("⚙")
+         expect($pole.array[0][3]).to eql("⚙")
          player_2.xod(3,player_2.symbol)
-         expect(pole.array[3][1]).to eql("⚙")
+         expect($pole.array[1][3]).to eql("⚙")
        end
      end
 
      context "it player can't turn" do
        it "don't add symbol ☢" do
-         expect(player_1.xod(2,player_1.symbol)).to be false
+         player_2.xod(3,player_2.symbol)
+         player_2.xod(3,player_2.symbol)
+         player_2.xod(3,player_2.symbol)
+         player_2.xod(3,player_2.symbol)
+         player_2.xod(3,player_2.symbol)
+         player_2.xod(3,player_2.symbol)
+         expect(player_1.xod(3,player_1.symbol)).to be false
        end
      end
 
      context "it Game Over" do
        it "draw" do
-         pole.full = true
+         $pole.array.map! { |e| e.map! { |e| e = "☢" } }
          expect(player_1.draw?).to be true
          expect(player_2.draw?).to be true
        end
 
        it "player_1 won" do
-         pole.array = [["*","☢","*","*","*","*","*"],["*","☢","*","*","*","*","*"],["*","☢","*","*","*","*","*"],
+         $pole.array = [["*","☢","*","*","*","*","*"],["*","☢","*","*","*","*","*"],["*","☢","*","*","*","*","*"],
          ["*","☢","*","*","*","*","*"],["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"]]
          expect(player_1.won?).to be true
          expect(player_2.won?).to be false
        end
 
        it "player_2 won" do
-         pole.array = [["*","⚙","*","*","*","*","*"],["*","⚙","*","*","*","*","*"],["*","⚙","*","*","*","*","*"],
+         $pole.array = [["*","⚙","*","*","*","*","*"],["*","⚙","*","*","*","*","*"],["*","⚙","*","*","*","*","*"],
          ["*","⚙","*","*","*","*","*"],["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"]]
+         expect(player_2.won?).to be true
+         expect(player_1.won?).to be false
+       end
+
+       it "player_2 won via diagonal" do
+         $pole.array = [["*","⚙","*","*","*","*","*"],["*","*","⚙","*","*","*","*"],["*","*","*","⚙","*","*","*"],
+         ["*","*","*","*","⚙","*","*"],["*","*","*","*","*","*","*"],["*","*","*","*","*","*","*"]]
          expect(player_2.won?).to be true
          expect(player_1.won?).to be false
        end
