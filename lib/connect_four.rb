@@ -95,10 +95,13 @@ class Game
     end
 
     def show
-      print "\u2501"*33
-      @array.reverse.each {|string| print "\n\u2503\t#{string.join("  ")}\t\u2503\n"}
-      print "\u2501"*33
-      print "\n        0  1  2  3  4  5  6\n"
+      print "\u250F"+"\u2501"*31+"\u2513"
+      @array.reverse.each_with_index {|string,index|
+                                      print "\t\t\t\t\u2503" if index > 0
+                                      print "\n\u2503\t#{string.join("  ")}\t\u2503\n"
+                                      print "\u2503" if index < 5}
+      print "\u2517"+"\u2501"*31+"\u251B"
+      print "\n\t0  1  2  3  4  5  6\n"
     end
   end
 
